@@ -76,3 +76,15 @@ function jsonToNode(obj: any): SceneNode {
 function clone(value: any) {
   return JSON.parse(JSON.stringify(value));
 }
+
+function copyToClipboard(text: string) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'absolute';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  document.body.removeChild(textarea);
+}

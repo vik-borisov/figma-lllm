@@ -2,11 +2,11 @@
   "name": "figma-raw-component",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "test": "echo 'No tests specified' && exit 0"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.113.0",
-    "typescript": "^5.2.0"
+    "typescript": "^5.8.3"
   }
 }

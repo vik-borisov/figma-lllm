@@ -3,5 +3,20 @@
   "id": "figma-raw-component-export-import",
   "api": "1.0.0",
   "main": "dist/code.js",
-  "ui": "dist/ui.html"
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+  "permissions": [],
+  "menu": [
+    {
+      "name": "Export Component",
+      "command": "export-component"
+    },
+    {
+      "name": "Import Component",
+      "command": "import-component"
+    }
+  ]
 }
