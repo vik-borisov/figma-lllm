@@ -8,13 +8,13 @@
 </head>
 <body>
   <h3>Raw Component Export/Import</h3>
-  <button id="exportBtn">Export Selection</button>
-  <input type="file" id="importFile" />
+  <button id="exportBtn">Copy Selection to Clipboard</button>
+  <button id="importBtn">Import from Clipboard</button>
   <pre id="output"></pre>
   <button id="closeBtn">Close</button>
   <script>
     const exportBtn = document.getElementById('exportBtn');
-    const importFile = document.getElementById('importFile');
+    const importBtn = document.getElementById('importBtn');
     const output = document.getElementById('output');
     const closeBtn = document.getElementById('closeBtn');
 
@@ -22,19 +22,14 @@
       parent.postMessage({ pluginMessage: { type: 'export' } }, '*');
     };
 
-    importFile.onchange = () => {
-      const file = importFile.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const data = JSON.parse(reader.result);
-          parent.postMessage({ pluginMessage: { type: 'import', data } }, '*');
-        } catch (err) {
-          output.textContent = 'Invalid JSON';
-        }
-      };
-      reader.readAsText(file);
+    importBtn.onclick = async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        const data = JSON.parse(text);
+        parent.postMessage({ pluginMessage: { type: 'import', data } }, '*');
+      } catch (err) {
+        output.textContent = 'Invalid clipboard content';
+      }
     };
 
     closeBtn.onclick = () => {
@@ -45,13 +40,8 @@
       const msg = event.data.pluginMessage;
       if (msg.type === 'exported') {
         const str = JSON.stringify(msg.data, null, 2);
-        const blob = new Blob([str], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'component.json';
-        a.click();
-        output.textContent = 'Exported!';
+        navigator.clipboard.writeText(str);
+        output.textContent = 'Copied to clipboard!';
       } else if (msg.type === 'imported') {
         output.textContent = 'Imported!';
       } else if (msg.type === 'error') {
