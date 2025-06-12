@@ -76,7 +76,6 @@ function jsonToNode(obj: any): SceneNode {
 function clone(value: any) {
   return JSON.parse(JSON.stringify(value));
 }
-
 function copyToClipboard(text: string) {
   const textarea = document.createElement('textarea');
   textarea.value = text;
