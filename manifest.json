@@ -1,0 +1,7 @@
+{
+  "name": "Raw Component Export Import",
+  "id": "figma-raw-component-export-import",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html"
+}

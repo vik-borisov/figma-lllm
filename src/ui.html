@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body { font-family: sans-serif; }
+  </style>
+</head>
+<body>
+  <h3>Raw Component Export/Import</h3>
+  <button id="exportBtn">Copy Selection to Clipboard</button>
+  <button id="importBtn">Import from Clipboard</button>
+  <pre id="output"></pre>
+  <button id="closeBtn">Close</button>
+  <script>
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const output = document.getElementById('output');
+    const closeBtn = document.getElementById('closeBtn');
+
+    exportBtn.onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'export' } }, '*');
+    };
+
+    importBtn.onclick = async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        const data = JSON.parse(text);
+        parent.postMessage({ pluginMessage: { type: 'import', data } }, '*');
+      } catch (err) {
+        output.textContent = 'Invalid clipboard content';
+      }
+    };
+
+    closeBtn.onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
+    };
+
+    onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg.type === 'exported') {
+        const str = JSON.stringify(msg.data, null, 2);
+        navigator.clipboard.writeText(str);
+        output.textContent = 'Copied to clipboard!';
+      } else if (msg.type === 'imported') {
+        output.textContent = 'Imported!';
+      } else if (msg.type === 'error') {
+        output.textContent = 'Error: ' + msg.message;
+      }
+    };
+  </script>
+</body>
+</html>
