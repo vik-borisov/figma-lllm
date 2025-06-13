@@ -1,3 +1,5 @@
+import { NODE_TYPE_PROPS } from './node-type-props';
+
 figma.showUI(__html__, { width: 400, height: 300 });
 
 figma.ui.onmessage = async (msg) => {
@@ -24,15 +26,19 @@ figma.ui.onmessage = async (msg) => {
 };
 
 function nodeToJSON(node: SceneNode): any {
-  const obj: any = {
-    id: node.id,
-    type: node.type,
-    name: node.name,
-  };
-  if ('width' in node) obj.width = node.width;
-  if ('height' in node) obj.height = node.height;
-  if ('fills' in node) obj.fills = clone((node as GeometryMixin).fills);
-  if ('characters' in node) obj.characters = (node as TextNode).characters;
+  const obj: any = { type: node.type };
+  const props = NODE_TYPE_PROPS[node.type] || [];
+  for (const key of props) {
+    if (key === 'children') continue;
+    try {
+      const value = (node as any)[key];
+      if (typeof value !== 'function' && key !== 'parent') {
+        obj[key] = clone(value);
+      }
+    } catch {
+      // ignore read-only or unsupported properties
+    }
+  }
   if ('children' in node) {
     obj.children = [];
     for (const child of (node as ChildrenMixin).children) {
@@ -61,9 +67,29 @@ function jsonToNode(obj: any): SceneNode {
       break;
   }
   node.name = obj.name || '';
-  if ('width' in obj && 'height' in obj && 'resize' in node)
-    (node as LayoutMixin).resize(obj.width, obj.height);
-  if ('fills' in obj) (node as GeometryMixin).fills = obj.fills;
+  if ('width' in obj && 'height' in obj && 'resize' in node) {
+    try {
+      (node as LayoutMixin).resize(obj.width, obj.height);
+    } catch {}
+  }
+  if ('fills' in obj) {
+    try {
+      (node as GeometryMixin).fills = obj.fills;
+    } catch {}
+  }
+  const props = NODE_TYPE_PROPS[obj.type] || [];
+  for (const key of props) {
+    if (key === 'children' || key === 'type' || key === 'parent' || key === 'name' || key === 'width' || key === 'height' || key === 'fills') continue;
+    if (obj[key] === undefined) continue;
+    try {
+      const target = (node as any)[key];
+      if (typeof target !== 'function') {
+        (node as any)[key] = clone(obj[key]);
+      }
+    } catch {
+      // ignore read-only or unsupported properties
+    }
+  }
   if (obj.children && 'appendChild' in node) {
     for (const childObj of obj.children) {
       const child = jsonToNode(childObj);
