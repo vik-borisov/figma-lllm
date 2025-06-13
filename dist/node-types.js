@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NODE_TYPES = void 0;
-exports.NODE_TYPES = [
+export const NODE_TYPES = [
     'DOCUMENT',
     'PAGE',
     'SLICE',

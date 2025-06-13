@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NODE_TYPE_PROPS = void 0;
-exports.NODE_TYPE_PROPS = {
+export const NODE_TYPE_PROPS = {
     "REMOVED": [
         "id",
         "removed",

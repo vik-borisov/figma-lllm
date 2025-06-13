@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,8 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const node_type_props_1 = require("./node-type-props");
+import { NODE_TYPE_PROPS } from './node-type-props.js';
 figma.showUI(__html__, { width: 400, height: 300 });
 figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
     if (msg.type === 'export') {
@@ -38,7 +36,7 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
 });
 function nodeToJSON(node) {
     const obj = { type: node.type };
-    const props = node_type_props_1.NODE_TYPE_PROPS[node.type] || [];
+    const props = NODE_TYPE_PROPS[node.type] || [];
     for (const key of props) {
         if (key === 'children')
             continue;
@@ -92,7 +90,7 @@ function jsonToNode(obj) {
         }
         catch (_b) { }
     }
-    const props = node_type_props_1.NODE_TYPE_PROPS[obj.type] || [];
+    const props = NODE_TYPE_PROPS[obj.type] || [];
     for (const key of props) {
         if (key === 'children' || key === 'type' || key === 'parent' || key === 'name' || key === 'width' || key === 'height' || key === 'fills')
             continue;
