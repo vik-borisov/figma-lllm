@@ -8,13 +8,15 @@
 </head>
 <body>
   <h3>Raw Component Export/Import</h3>
-  <button id="exportBtn">Copy Selection to Clipboard</button>
-  <button id="importBtn">Import from Clipboard</button>
+  <textarea id="jsonInput" rows="10" style="width:100%" placeholder="Paste JSON here"></textarea>
+  <button id="exportBtn">Export Selection</button>
+  <button id="importBtn">Import from Text</button>
   <pre id="output"></pre>
   <button id="closeBtn">Close</button>
   <script>
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
+    const jsonInput = document.getElementById('jsonInput');
     const output = document.getElementById('output');
     const closeBtn = document.getElementById('closeBtn');
 
@@ -22,13 +24,13 @@
       parent.postMessage({ pluginMessage: { type: 'export' } }, '*');
     };
 
-    importBtn.onclick = async () => {
+    importBtn.onclick = () => {
       try {
-        const text = await navigator.clipboard.readText();
+        const text = jsonInput.value;
         const data = JSON.parse(text);
         parent.postMessage({ pluginMessage: { type: 'import', data } }, '*');
       } catch (err) {
-        output.textContent = 'Invalid clipboard content';
+        output.textContent = 'Invalid JSON';
       }
     };
 
@@ -36,32 +38,12 @@
       parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
     };
 
-    function fallbackCopy(text) {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.setAttribute('readonly', '');
-      textarea.style.position = 'fixed';
-      textarea.style.top = '-9999px';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    }
-
-    function copyText(text) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-      } else {
-        fallbackCopy(text);
-      }
-    }
-
     onmessage = (event) => {
       const msg = event.data.pluginMessage;
       if (msg.type === 'exported') {
         const str = JSON.stringify(msg.data, null, 2);
-        copyText(str);
-        output.textContent = 'Copied to clipboard!';
+        jsonInput.value = str;
+        output.textContent = 'JSON ready';
       } else if (msg.type === 'imported') {
         output.textContent = 'Imported!';
       } else if (msg.type === 'error') {
