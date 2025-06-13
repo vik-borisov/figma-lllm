@@ -8,6 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+const node_type_props_1 = require("./node-type-props");
 figma.showUI(__html__, { width: 400, height: 300 });
 figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
     if (msg.type === 'export') {
@@ -35,19 +37,21 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 function nodeToJSON(node) {
-    const obj = {
-        id: node.id,
-        type: node.type,
-        name: node.name,
-    };
-    if ('width' in node)
-        obj.width = node.width;
-    if ('height' in node)
-        obj.height = node.height;
-    if ('fills' in node)
-        obj.fills = clone(node.fills);
-    if ('characters' in node)
-        obj.characters = node.characters;
+    const obj = { type: node.type };
+    const props = node_type_props_1.NODE_TYPE_PROPS[node.type] || [];
+    for (const key of props) {
+        if (key === 'children')
+            continue;
+        try {
+            const value = node[key];
+            if (typeof value !== 'function' && key !== 'parent') {
+                obj[key] = clone(value);
+            }
+        }
+        catch (_a) {
+            // ignore read-only or unsupported properties
+        }
+    }
     if ('children' in node) {
         obj.children = [];
         for (const child of node.children) {
@@ -76,10 +80,34 @@ function jsonToNode(obj) {
             break;
     }
     node.name = obj.name || '';
-    if ('width' in obj && 'height' in obj && 'resize' in node)
-        node.resize(obj.width, obj.height);
-    if ('fills' in obj)
-        node.fills = obj.fills;
+    if ('width' in obj && 'height' in obj && 'resize' in node) {
+        try {
+            node.resize(obj.width, obj.height);
+        }
+        catch (_a) { }
+    }
+    if ('fills' in obj) {
+        try {
+            node.fills = obj.fills;
+        }
+        catch (_b) { }
+    }
+    const props = node_type_props_1.NODE_TYPE_PROPS[obj.type] || [];
+    for (const key of props) {
+        if (key === 'children' || key === 'type' || key === 'parent' || key === 'name' || key === 'width' || key === 'height' || key === 'fills')
+            continue;
+        if (obj[key] === undefined)
+            continue;
+        try {
+            const target = node[key];
+            if (typeof target !== 'function') {
+                node[key] = clone(obj[key]);
+            }
+        }
+        catch (_c) {
+            // ignore read-only or unsupported properties
+        }
+    }
     if (obj.children && 'appendChild' in node) {
         for (const childObj of obj.children) {
             const child = jsonToNode(childObj);
