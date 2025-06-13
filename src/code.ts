@@ -1,4 +1,4 @@
-import { NODE_TYPE_PROPS } from './node-type-props';
+import { NODE_TYPE_PROPS } from './node-type-props.js';
 
 figma.showUI(__html__, { width: 400, height: 300 });
 
