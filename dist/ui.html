@@ -36,11 +36,31 @@
       parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
     };
 
+    function fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.top = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
     onmessage = (event) => {
       const msg = event.data.pluginMessage;
       if (msg.type === 'exported') {
         const str = JSON.stringify(msg.data, null, 2);
-        navigator.clipboard.writeText(str);
+        copyText(str);
         output.textContent = 'Copied to clipboard!';
       } else if (msg.type === 'imported') {
         output.textContent = 'Imported!';
